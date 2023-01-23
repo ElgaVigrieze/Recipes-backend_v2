@@ -12,15 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Ingredient {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private Unit unit;
     private Float quantity;
-
-//    public Ingredient(String name, Unit unit, Float quantity) {
-//        this.name = name;
-//        this.unit = unit;
-//        this.quantity = quantity;
-//    }
 }

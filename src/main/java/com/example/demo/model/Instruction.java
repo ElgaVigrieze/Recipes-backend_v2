@@ -13,13 +13,7 @@ public class Instruction {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-//    private int step;
     private String body;
-//    @Transient
-//    private Instruction[] instructions;
 
-//    public int getStep() {
-//        return java.util.Arrays.asList(instructions).indexOf(this);
-//    }
 
 }

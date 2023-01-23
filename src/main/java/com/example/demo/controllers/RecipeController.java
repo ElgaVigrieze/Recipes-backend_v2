@@ -23,27 +23,35 @@ import java.util.*;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class RecipeController {
+
     @Autowired
     private RecipeRepo recipeRepo;
+
     @Autowired
     private UserRepo userRepo;
 
     @Autowired
-    private RecipeCustomRepo recipeCustomRepo;
-
-    @Autowired
     private IngredientRepo ingredientRepo;
 
-
     @RequestMapping("/login")
-    public boolean login(@RequestBody User user) {
-        var userFound = (User)userRepo.findByName(user.getName());
-        return userFound.getName().equals(user.getName()) && userFound.getPassword().equals(user.getPassword());
+    public Long login(@RequestBody User user) {
+        var userFound = userRepo.findByName(user.getName());
+        if(userFound != null){
+            if(userFound.getName().equals(user.getName()) && userFound.getPassword().equals(user.getPassword())){
+                return userFound.getId();
+            }
+        }
+        return 0L;
+    }
+
+    @RequestMapping("/user/{id}")
+    public Object findUserById(@PathVariable Long id) {
+        return userRepo.findById(id);
     }
 
     @PostMapping("/signup")
-    public Long signup(@RequestBody User user) {
-        return userRepo.saveUser(user);
+    public User signup(@RequestBody User user) {
+        return userRepo.save(user);
     }
 
     @GetMapping("/recipes")
@@ -53,14 +61,14 @@ public class RecipeController {
 
     @PostMapping("/recipes")
     public long handleFileUpload(@RequestBody Recipe recipe) {
-        return recipeCustomRepo.saveIt(recipe);
+        return recipeRepo.saveIt(recipe);
     }
 
     @PostMapping("/recipes/uploadImage/{id}")
     public long handleFileUpload(@PathVariable int id ,
                                  @RequestParam("file") MultipartFile file, HttpSession session)
             throws IOException {
-        return recipeCustomRepo.store(file, id, session);
+        return recipeRepo.store(file, id, session);
     }
 
     @GetMapping("/recipes/{id}")
@@ -82,7 +90,7 @@ public class RecipeController {
 
     @GetMapping("/recipes/default/{id}")
     public boolean setDefaultPic(@PathVariable long id) {
-        recipeCustomRepo.setDefaultPic(id);
+        recipeRepo.setDefaultPic(id);
         return true;
     }
 
@@ -93,13 +101,15 @@ public class RecipeController {
     }
 
     @PutMapping("/recipes/{id}")
-    public ResponseEntity<Recipe> updateRecipe(@PathVariable Long id, @RequestBody Recipe recipeDetails){
+    public ResponseEntity<Recipe> updateRecipe(@PathVariable Long id, @RequestBody Recipe recipeUpdate){
         Recipe recipe = recipeRepo.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Recipe doesn't exist"));
-        recipe.setTitle(recipeDetails.getTitle());
-        recipe.setPortionSize(recipeDetails.getPortionSize());
-        recipe.setInstructions(recipeDetails.getInstructions());
-        recipe.setIblocks(recipeDetails.getIblocks());
+        recipe.setTitle(recipeUpdate.getTitle());
+        recipe.setPortionSize(recipeUpdate.getPortionSize());
+        recipe.setIblocks(recipeUpdate.getIblocks());
+        recipe.setPic(recipeUpdate.getPic());
+        recipe.setInstructions(recipeUpdate.getInstructions());
+        recipe.setUser(recipeUpdate.getUser());
         Recipe updatedRecipe = recipeRepo.save(recipe);
         return ResponseEntity.ok(updatedRecipe);
     }
